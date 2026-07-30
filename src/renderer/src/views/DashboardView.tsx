@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, ArrowRight } from 'lucide-react'
-import { useAppStore } from '../store/useAppStore'
-import { fadeRise, staggerContainer } from '../lib/motion'
+import { ArrowRight, LayoutDashboard, Plus } from 'lucide-react'
+import type React from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { EmptyState } from '../components/EmptyState'
+import { fadeRise, staggerContainer } from '../lib/motion'
+import { toast } from '../lib/toast'
+import { useAppStore } from '../store/useAppStore'
 
 function useGreeting(): string {
   return useMemo(() => {
@@ -28,10 +30,20 @@ const WorldClock: React.FC = () => {
   return (
     <div className="sm:text-right">
       <div className="text-2xl font-bold tabular-nums leading-none">
-        {now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+        {now.toLocaleTimeString(undefined, {
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        })}
       </div>
       <div className="mt-1.5 text-2xs font-medium uppercase tracking-widest text-muted-foreground">
-        {now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+        {now.toLocaleDateString(undefined, {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        })}
       </div>
     </div>
   )
@@ -47,6 +59,7 @@ const WorldClock: React.FC = () => {
 export const DashboardView: React.FC = () => {
   const greeting = useGreeting()
   const appVersion = useAppStore((s) => s.appVersion)
+  const setView = useAppStore((s) => s.setView)
 
   // Example stats — replace with real data from your store
   const stats = [
@@ -66,7 +79,10 @@ export const DashboardView: React.FC = () => {
       >
         <div className="mx-auto w-full max-w-4xl px-8 py-10">
           {/* Greeting + clock */}
-          <motion.div variants={fadeRise()} className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <motion.div
+            variants={fadeRise()}
+            className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+          >
             <div>
               <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
               <p className="mt-1 text-sm text-muted-foreground">Welcome to your app.</p>
@@ -82,14 +98,18 @@ export const DashboardView: React.FC = () => {
             {stats.map((s) => (
               <div key={s.key} className="bg-card px-4 py-3">
                 <div className="text-2xl font-bold tabular-nums text-foreground">{s.value}</div>
-                <div className="mt-0.5 text-2xs font-medium uppercase tracking-widest text-muted-foreground">{s.label}</div>
+                <div className="mt-0.5 text-2xs font-medium uppercase tracking-widest text-muted-foreground">
+                  {s.label}
+                </div>
               </div>
             ))}
           </motion.div>
 
           {/* Activity feed — replace with real items */}
           <motion.div variants={fadeRise()} className="mt-8">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Recent activity</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Recent activity
+            </h2>
             <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">
               <EmptyState
                 icon={LayoutDashboard}
@@ -101,14 +121,27 @@ export const DashboardView: React.FC = () => {
 
           {/* Quick actions — replace with your own buttons */}
           <motion.div variants={fadeRise()} className="mt-8">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Quick actions</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Quick actions
+            </h2>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
-                onClick={() => {}}
+                type="button"
+                onClick={() =>
+                  toast.info('Ready to go!', { description: 'Add your first quick action here.' })
+                }
                 className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
               >
                 <ArrowRight className="size-3.5" />
                 Get started
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('home')}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                Add workspace
               </button>
             </div>
           </motion.div>

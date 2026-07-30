@@ -22,6 +22,7 @@ paths:
 ## Workspace conventions
 
 Each workspace entry in `src/renderer/src/lib/workspaces.ts` has:
+
 - `id` — camelCase string, matches routing key in `App.tsx`
 - `name` — display name shown in sidebar
 - `icon` — Lucide React icon component
@@ -38,6 +39,7 @@ Or use `/add-workspace <name>` to do all three automatically.
 ## View component pattern
 
 Follow the pattern in `src/renderer/src/views/DashboardView.tsx`:
+
 - Default export, no props required
 - Uses Tailwind v4 tokens, Lucide icons, shadcn/ui primitives
 - No direct IPC calls in the view — use `window.api.*` via a hook or store action

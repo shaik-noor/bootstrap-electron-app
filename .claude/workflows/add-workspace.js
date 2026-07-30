@@ -1,12 +1,13 @@
 export const meta = {
   name: 'add-workspace',
-  description: 'Add a new workspace (nav section) to the app: registers it in the workspace registry, creates a view component, and wires up routing in App.tsx',
+  description:
+    'Add a new workspace (nav section) to the app: registers it in the workspace registry, creates a view component, and wires up routing in App.tsx',
   whenToUse: 'Use when adding a new top-level section to the sidebar navigation',
   phases: [
     { title: 'Plan', detail: 'Design workspace entry and view structure' },
     { title: 'Implement', detail: 'Create view and update registry + router' },
-    { title: 'Verify', detail: 'Check all wiring is consistent' },
-  ],
+    { title: 'Verify', detail: 'Check all wiring is consistent' }
+  ]
 }
 
 // args: workspace name, e.g. "Analytics" or { name: "Analytics", icon: "BarChart2", tint: "#6366f1" }
@@ -31,10 +32,10 @@ const plan = await agent(
         id: { type: 'string' },
         viewFilePath: { type: 'string' },
         icon: { type: 'string' },
-        tintColor: { type: 'string' },
-      },
-    },
-  },
+        tintColor: { type: 'string' }
+      }
+    }
+  }
 )
 
 log(`Workspace id: "${plan?.id}", view file: ${plan?.viewFilePath}`)
@@ -50,22 +51,22 @@ await parallel([
         'Use Tailwind v4 oklch tokens for colors, Lucide React for icons, shadcn/ui primitives. ' +
         'Include a meaningful placeholder layout relevant to the workspace name. ' +
         'No window.alert/confirm — use toast.* or confirmDialog() if needed.',
-      { label: 'create-view', phase: 'Implement', agentType: 'ui-component-builder' },
+      { label: 'create-view', phase: 'Implement', agentType: 'ui-component-builder' }
     ),
   () =>
     agent(
       `Register the new workspace in \`src/renderer/src/lib/workspaces.ts\`. ` +
         `Add an entry with id: "${plan?.id}", name: "${workspaceName}", icon: ${plan?.icon} (Lucide), ` +
         `tint: "${plan?.tintColor}". Read the file first and match the existing registry entry format exactly.`,
-      { label: 'update-registry', phase: 'Implement' },
-    ),
+      { label: 'update-registry', phase: 'Implement' }
+    )
 ])
 
 await agent(
   `Wire the new workspace into the router in \`src/renderer/src/App.tsx\`. ` +
     `Import the view from \`${plan?.viewFilePath}\` and add a case for workspace id "${plan?.id}" ` +
     'in the same switch/conditional that renders other workspaces. Read App.tsx first.',
-  { label: 'update-router', phase: 'Implement' },
+  { label: 'update-router', phase: 'Implement' }
 )
 
 phase('Verify')
@@ -75,7 +76,7 @@ await agent(
     '(2) `src/renderer/src/lib/workspaces.ts` contains the new entry, ' +
     '(3) `src/renderer/src/App.tsx` imports and renders it for the correct workspace id. ' +
     'Read all three files and report any missing pieces.',
-  { label: 'verify-workspace', agentType: 'code-reviewer' },
+  { label: 'verify-workspace', agentType: 'code-reviewer' }
 )
 
 log(`Workspace "${workspaceName}" (id: "${plan?.id}") added successfully.`)

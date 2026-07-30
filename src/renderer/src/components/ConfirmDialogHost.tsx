@@ -1,5 +1,5 @@
-import React, { useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import type React from 'react'
 import { useConfirmStore } from '../lib/confirm'
 import { duration, ease, prefersReducedMotion } from '../lib/motion'
 
@@ -35,12 +35,14 @@ export const ConfirmDialogHost: React.FC = () => {
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button
+                type="button"
                 onClick={() => resolve(false)}
                 className="h-8 px-3 rounded-lg text-xs font-medium border border-border hover:bg-muted transition-colors cursor-pointer"
               >
                 {current.cancelText ?? 'Cancel'}
               </button>
               <button
+                type="button"
                 onClick={() => resolve(true)}
                 className={[
                   'h-8 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer',

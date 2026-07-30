@@ -1,12 +1,14 @@
 export const meta = {
   name: 'sync-docs',
-  description: 'Sync CLAUDE.md, AGENTS.md, and all .claude/ instruction files so they accurately reflect the current codebase state',
-  whenToUse: 'Run after any structural change: new IPC channel, new component, new workspace, schema change, new agent/skill/workflow',
+  description:
+    'Sync CLAUDE.md, AGENTS.md, and all .claude/ instruction files so they accurately reflect the current codebase state',
+  whenToUse:
+    'Run after any structural change: new IPC channel, new component, new workspace, schema change, new agent/skill/workflow',
   phases: [
     { title: 'Audit', detail: 'Read codebase and all doc files to find gaps' },
     { title: 'Update', detail: 'Apply changes to out-of-sync docs in parallel' },
-    { title: 'Verify', detail: 'Confirm all docs are consistent' },
-  ],
+    { title: 'Verify', detail: 'Confirm all docs are consistent' }
+  ]
 }
 
 // Phase 1: audit — read everything in parallel and find what's stale
@@ -53,13 +55,13 @@ const audit = await agent(
             properties: {
               docFile: { type: 'string' },
               issue: { type: 'string' },
-              currentCodeFact: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-  },
+              currentCodeFact: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  }
 )
 
 const discrepancies = audit?.discrepancies ?? []
@@ -84,22 +86,26 @@ log(`Files to update: ${Object.keys(byFile).join(', ')}`)
 phase('Update')
 
 const updates = await parallel(
-  Object.entries(byFile).map(([docFile, issues]) => () =>
-    agent(
-      `Update the documentation file \`${docFile}\` to fix these verified discrepancies:\n\n` +
-        issues.map((i) => `- ${i.issue}\n  Current code fact: ${i.currentCodeFact}`).join('\n') +
-        '\n\nRules:\n' +
-        '- Read the file first, then make only the minimal edits to fix these specific issues\n' +
-        '- Do NOT rewrite sections unaffected by the discrepancies\n' +
-        '- Do NOT add new information beyond what the discrepancy fix requires\n' +
-        '- Preserve all existing formatting, headings, and structure\n' +
-        '- For CLAUDE.md and AGENTS.md: keep the same concise, non-verbose style',
-      {
-        label: `update:${docFile}`,
-        phase: 'Update',
-      },
-    ),
-  ),
+  Object.entries(byFile).map(
+    ([docFile, issues]) =>
+      () =>
+        agent(
+          `Update the documentation file \`${docFile}\` to fix these verified discrepancies:\n\n` +
+            issues
+              .map((i) => `- ${i.issue}\n  Current code fact: ${i.currentCodeFact}`)
+              .join('\n') +
+            '\n\nRules:\n' +
+            '- Read the file first, then make only the minimal edits to fix these specific issues\n' +
+            '- Do NOT rewrite sections unaffected by the discrepancies\n' +
+            '- Do NOT add new information beyond what the discrepancy fix requires\n' +
+            '- Preserve all existing formatting, headings, and structure\n' +
+            '- For CLAUDE.md and AGENTS.md: keep the same concise, non-verbose style',
+          {
+            label: `update:${docFile}`,
+            phase: 'Update'
+          }
+        )
+  )
 )
 
 // Phase 3: verify no new gaps were introduced
@@ -113,7 +119,7 @@ await agent(
       .join('\n') +
     '\n\nDiscrepancies that should be gone:\n' +
     discrepancies.map((d) => `- ${d.docFile}: ${d.issue}`).join('\n'),
-  { label: 'verify-sync', agentType: 'code-reviewer' },
+  { label: 'verify-sync', agentType: 'code-reviewer' }
 )
 
 log(`Docs synced: ${updates.filter(Boolean).length} file(s) updated.`)

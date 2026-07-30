@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Home, ArrowRight } from 'lucide-react'
-import { useAppStore } from '../store/useAppStore'
+import { ArrowRight, Home } from 'lucide-react'
+import type React from 'react'
 import { fadeRise, staggerContainer } from '../lib/motion'
 import { WORKSPACES } from '../lib/workspaces'
+import { useAppStore } from '../store/useAppStore'
 
 /**
  * HomeView — the landing screen shown when the user navigates to 'home'.
@@ -35,17 +35,22 @@ export const HomeView: React.FC = () => {
 
           {/* Workspace cards */}
           <motion.div variants={fadeRise()}>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Workspaces</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+              Workspaces
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {WORKSPACES.map((ws) => {
                 const WsIcon = ws.icon
                 return (
                   <button
+                    type="button"
                     key={ws.id}
                     onClick={() => setView(ws.id)}
                     className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted cursor-pointer"
                   >
-                    <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${ws.tint.tile} ${ws.tint.tileHover}`}>
+                    <div
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${ws.tint.tile} ${ws.tint.tileHover}`}
+                    >
                       <WsIcon className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">

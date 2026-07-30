@@ -1,12 +1,13 @@
 export const meta = {
   name: 'add-ipc-channel',
-  description: 'Scaffold a complete new IPC channel across all three required files (main, preload, types)',
+  description:
+    'Scaffold a complete new IPC channel across all three required files (main, preload, types)',
   whenToUse: 'Use when adding any new main↔renderer communication channel',
   phases: [
     { title: 'Plan', detail: 'Design channel signature and namespace' },
     { title: 'Implement', detail: 'Write handler, preload wrapper, and type declaration' },
-    { title: 'Verify', detail: 'Check all three files are consistent' },
-  ],
+    { title: 'Verify', detail: 'Check all three files are consistent' }
+  ]
 }
 
 // args should be a description of the channel, e.g.:
@@ -33,14 +34,14 @@ const plan = await agent(
         outputType: { type: 'string' },
         namespace: { type: 'string' },
         needsDb: { type: 'boolean' },
-        notes: { type: 'string' },
-      },
-    },
-  },
+        notes: { type: 'string' }
+      }
+    }
+  }
 )
 
 log(
-  `Planned channel: ${plan?.channelName} (${plan?.isSync ? 'sync' : 'async'}) in namespace "${plan?.namespace}"`,
+  `Planned channel: ${plan?.channelName} (${plan?.isSync ? 'sync' : 'async'}) in namespace "${plan?.namespace}"`
 )
 
 // Phase 2: implement all three files in sequence (they depend on each other)
@@ -53,7 +54,7 @@ const mainResult = await agent(
     `Use ${plan?.isSync ? 'wrapData (sync version)' : plan?.outputType === 'void' ? 'wrapVoid' : 'wrapData<T>'}. ` +
     (plan?.needsDb ? 'Use DatabaseService static methods for any DB access. ' : '') +
     'Read the file first, then add the handler in the registerIpcHandlers function. Match existing code style exactly.',
-  { label: 'implement-main', agentType: 'ipc-builder' },
+  { label: 'implement-main', agentType: 'ipc-builder' }
 )
 
 const preloadResult = await agent(
@@ -62,7 +63,7 @@ const preloadResult = await agent(
     `Use ipcRenderer.${plan?.isSync ? 'sendSync' : 'invoke'}("${plan?.channelName}", ...). ` +
     `Input type: ${plan?.inputType}. Output type: IpcResult<${plan?.outputType}>. ` +
     'Read the file first, then make the minimal edit. Match existing code style exactly.',
-  { label: 'implement-preload', agentType: 'ipc-builder' },
+  { label: 'implement-preload', agentType: 'ipc-builder' }
 )
 
 const typesResult = await agent(
@@ -72,7 +73,7 @@ const typesResult = await agent(
     `Input: ${plan?.inputType}. Return: Promise<IpcResult<${plan?.outputType}>>` +
     `${plan?.isSync ? ' (or synchronous IpcResult)' : ''}. ` +
     'Read the file first, then make the minimal edit.',
-  { label: 'implement-types', agentType: 'ipc-builder' },
+  { label: 'implement-types', agentType: 'ipc-builder' }
 )
 
 // Phase 3: verify consistency
@@ -83,7 +84,7 @@ await agent(
     'Read all three files and confirm: (1) channel name matches exactly, (2) wrapData/wrapVoid is used in main, ' +
     '(3) preload calls invoke/sendSync with the correct channel name, (4) TypeScript types are consistent. ' +
     'Report any discrepancies.',
-  { label: 'verify-consistency', agentType: 'code-reviewer' },
+  { label: 'verify-consistency', agentType: 'code-reviewer' }
 )
 
 log(`IPC channel "${plan?.channelName}" scaffolded across all three files.`)

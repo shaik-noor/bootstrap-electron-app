@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type ToastVariant = 'success' | 'error' | 'info'
+export type ToastVariant = 'success' | 'error' | 'info' | 'warning'
 
 export interface ToastAction {
   label: string
@@ -47,7 +47,7 @@ interface ToastOptions {
 }
 
 function show(variant: ToastVariant, title: string, opts?: ToastOptions): string {
-  const fallback = variant === 'error' ? 6000 : opts?.action ? 6000 : 3500
+  const fallback = variant === 'error' || variant === 'warning' ? 6000 : opts?.action ? 6000 : 3500
   return useToastStore.getState().push({
     variant,
     title,
@@ -61,5 +61,6 @@ export const toast = {
   success: (title: string, opts?: ToastOptions) => show('success', title, opts),
   error: (title: string, opts?: ToastOptions) => show('error', title, opts),
   info: (title: string, opts?: ToastOptions) => show('info', title, opts),
+  warning: (title: string, opts?: ToastOptions) => show('warning', title, opts),
   dismiss: (id: string) => useToastStore.getState().dismiss(id)
 }

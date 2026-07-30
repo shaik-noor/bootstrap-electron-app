@@ -8,6 +8,10 @@ interface AppState {
   currentView: CurrentView
   setView: (view: CurrentView) => void
 
+  // ── Overlay sidebar (shown when sidebar is collapsed) ─────────────────────
+  sidebarOverlayOpen: boolean
+  setSidebarOverlayOpen: (open: boolean) => void
+
   // ── Settings dialog ───────────────────────────────────────────────────────
   settingsOpen: boolean
   setSettingsOpen: (open: boolean) => void
@@ -15,17 +19,16 @@ interface AppState {
   // ── App version ───────────────────────────────────────────────────────────
   appVersion: string
   loadAppVersion: () => Promise<void>
-
-  // ── Add your own state slices below ───────────────────────────────────────
-  // e.g.:
-  // items: Item[]
-  // loadItems: () => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set) => ({
   // Navigation
   currentView: 'home',
-  setView: (view) => set({ currentView: view }),
+  setView: (view) => set({ currentView: view, sidebarOverlayOpen: false }),
+
+  // Overlay sidebar
+  sidebarOverlayOpen: false,
+  setSidebarOverlayOpen: (open) => set({ sidebarOverlayOpen: open }),
 
   // Settings
   settingsOpen: false,

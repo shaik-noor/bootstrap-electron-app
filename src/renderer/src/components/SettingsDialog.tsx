@@ -1,9 +1,9 @@
-import React from 'react'
-import { X, Info } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useAppStore } from '../store/useAppStore'
-import { duration, ease, prefersReducedMotion } from '../lib/motion'
+import { Info, X } from 'lucide-react'
+import type React from 'react'
 import { useTheme } from '../context/ThemeContext'
+import { duration, ease, prefersReducedMotion } from '../lib/motion'
+import { useAppStore } from '../store/useAppStore'
 
 export const SettingsDialog: React.FC = () => {
   const settingsOpen = useAppStore((s) => s.settingsOpen)
@@ -36,6 +36,7 @@ export const SettingsDialog: React.FC = () => {
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/60">
               <h2 className="text-sm font-semibold text-foreground">Settings</h2>
               <button
+                type="button"
                 onClick={() => setSettingsOpen(false)}
                 className="size-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
@@ -56,6 +57,7 @@ export const SettingsDialog: React.FC = () => {
                     <p className="text-2xs text-muted-foreground">Choose light or dark mode</p>
                   </div>
                   <button
+                    type="button"
                     onClick={toggleTheme}
                     className="h-7 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
                   >
@@ -63,8 +65,6 @@ export const SettingsDialog: React.FC = () => {
                   </button>
                 </div>
               </section>
-
-              {/* Add your own settings sections here */}
 
               {/* About */}
               <section className="border-t border-border/60 pt-4">

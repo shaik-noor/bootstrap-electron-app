@@ -32,15 +32,15 @@ vi.mock('electron', () => ({
     getVersion: vi.fn(() => '0.0.0'),
     getPath: vi.fn(() => require('os').tmpdir()),
     quit: vi.fn(),
-    whenReady: vi.fn(async () => {}),
+    whenReady: vi.fn(async () => {})
   },
   BrowserWindow: {
     getAllWindows: vi.fn(() => []),
-    prototype: { setTitleBarOverlay: vi.fn(), setBackgroundColor: vi.fn() },
+    prototype: { setTitleBarOverlay: vi.fn(), setBackgroundColor: vi.fn() }
   },
   nativeTheme: { shouldUseDarkColors: false },
   shell: { openExternal: vi.fn() },
-  contextBridge: { exposeInMainWorld: vi.fn() },
+  contextBridge: { exposeInMainWorld: vi.fn() }
 }))
 ```
 
@@ -52,16 +52,16 @@ Object.assign(window, {
   api: {
     theme: {
       getInitialSync: vi.fn(() => 'light' as const),
-      changed: vi.fn(async () => ({ success: true })),
+      changed: vi.fn(async () => ({ success: true }))
     },
     settings: {
       load: vi.fn(async () => ({ success: true, data: {} })),
-      save: vi.fn(async () => ({ success: true })),
+      save: vi.fn(async () => ({ success: true }))
     },
     app: {
-      getVersion: vi.fn(async () => ({ success: true, data: '0.0.0' })),
-    },
-  },
+      getVersion: vi.fn(async () => ({ success: true, data: '0.0.0' }))
+    }
+  }
 })
 ```
 
@@ -71,8 +71,12 @@ Object.assign(window, {
 import { tmpdir } from 'os'
 vi.mock('electron', () => ({ app: { getPath: vi.fn(() => tmpdir()) } }))
 
-beforeEach(async () => { await DatabaseService.init() })
-afterEach(() => { /* DatabaseService exposes no close() yet — add one when needed */ })
+beforeEach(async () => {
+  await DatabaseService.init()
+})
+afterEach(() => {
+  /* DatabaseService exposes no close() yet — add one when needed */
+})
 ```
 
 ## IpcResult<T> assertions

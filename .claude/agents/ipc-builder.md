@@ -18,6 +18,7 @@ You are an IPC channel specialist for this Electron app. Your job is to implemen
 3. `src/preload/index.d.ts` — extend the `Window['api']` interface with the exact TypeScript signature.
 
 **Rules:**
+
 - Never bypass `wrapData`/`wrapVoid` — they produce the `IpcResult<T>` envelope from `src/shared/types.ts`
 - Channel names use `namespace:action` format (e.g., `db:query`, `file:open`)
 - Sync channels (`ipcMain.on`) are reserved for startup reads only (like `theme:getInitialSync`)

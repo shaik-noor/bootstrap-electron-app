@@ -1,12 +1,14 @@
 export const meta = {
   name: 'build-and-check',
-  description: 'Run typecheck and build, then report all errors with file locations and suggested fixes',
-  whenToUse: 'Use after significant changes to catch type errors and build failures before committing',
+  description:
+    'Run typecheck and build, then report all errors with file locations and suggested fixes',
+  whenToUse:
+    'Use after significant changes to catch type errors and build failures before committing',
   phases: [
     { title: 'Typecheck', detail: 'Run tsc for node and web projects' },
     { title: 'Build', detail: 'Run electron-vite build' },
-    { title: 'Fix', detail: 'Apply suggested fixes in parallel' },
-  ],
+    { title: 'Fix', detail: 'Apply suggested fixes in parallel' }
+  ]
 }
 
 // Phase 1: typecheck both TS projects
@@ -31,13 +33,13 @@ const typecheckResult = await agent(
               file: { type: 'string' },
               line: { type: 'number' },
               code: { type: 'string' },
-              message: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-  },
+              message: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  }
 )
 
 if (typecheckResult?.passed) {
@@ -60,10 +62,10 @@ const buildResult = await agent(
       properties: {
         passed: { type: 'boolean' },
         skipped: { type: 'boolean' },
-        errors: { type: 'array', items: { type: 'string' } },
-      },
-    },
-  },
+        errors: { type: 'array', items: { type: 'string' } }
+      }
+    }
+  }
 )
 
 const allErrors = [
@@ -71,9 +73,14 @@ const allErrors = [
     source: 'typecheck',
     file: e.file,
     line: e.line,
-    message: `${e.code}: ${e.message}`,
+    message: `${e.code}: ${e.message}`
   })),
-  ...(buildResult?.errors ?? []).map((e) => ({ source: 'build', file: 'unknown', line: 0, message: e })),
+  ...(buildResult?.errors ?? []).map((e) => ({
+    source: 'build',
+    file: 'unknown',
+    line: 0,
+    message: e
+  }))
 ]
 
 if (allErrors.length === 0) {
@@ -90,15 +97,19 @@ const byFile = allErrors.reduce((acc, e) => {
 }, {})
 
 const fixes = await parallel(
-  Object.entries(byFile).map(([file, errors]) => () =>
-    agent(
-      `Fix the following TypeScript errors in \`${file}\`:\n\n` +
-        errors.map((e) => `- Line ${e.line}: ${e.message}`).join('\n') +
-        '\n\nRead the file first, then apply the minimal fix. Do not refactor beyond what is needed.',
-      { label: `fix:${file}`, phase: 'Fix' },
-    ),
-  ),
+  Object.entries(byFile).map(
+    ([file, errors]) =>
+      () =>
+        agent(
+          `Fix the following TypeScript errors in \`${file}\`:\n\n` +
+            errors.map((e) => `- Line ${e.line}: ${e.message}`).join('\n') +
+            '\n\nRead the file first, then apply the minimal fix. Do not refactor beyond what is needed.',
+          { label: `fix:${file}`, phase: 'Fix' }
+        )
+  )
 )
 
-log(`Attempted fixes for ${Object.keys(byFile).length} file(s). Run /build-and-check again to verify.`)
+log(
+  `Attempted fixes for ${Object.keys(byFile).length} file(s). Run /build-and-check again to verify.`
+)
 return { success: false, errors: allErrors, fixesApplied: fixes.filter(Boolean).length }

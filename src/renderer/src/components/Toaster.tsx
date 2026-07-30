@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircle, XCircle, Info, X } from 'lucide-react'
-import { useToastStore, type Toast } from '../lib/toast'
+import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react'
+import type React from 'react'
 import { duration, ease, prefersReducedMotion } from '../lib/motion'
+import { type Toast, useToastStore } from '../lib/toast'
 import { cn } from '../lib/utils'
 
 const ICONS = {
   success: CheckCircle,
   error: XCircle,
-  info: Info
+  info: Info,
+  warning: AlertTriangle
 }
 
 const COLORS = {
   success: 'text-emerald-500',
   error: 'text-destructive',
-  info: 'text-primary'
+  info: 'text-primary',
+  warning: 'text-amber-500'
 }
 
 const ToastItem: React.FC<{ toast: Toast }> = ({ toast: t }) => {
@@ -39,7 +41,11 @@ const ToastItem: React.FC<{ toast: Toast }> = ({ toast: t }) => {
         )}
         {t.action && (
           <button
-            onClick={() => { t.action!.onClick(); dismiss(t.id) }}
+            type="button"
+            onClick={() => {
+              t.action?.onClick()
+              dismiss(t.id)
+            }}
             className="mt-1.5 text-2xs font-semibold text-primary hover:underline cursor-pointer"
           >
             {t.action.label}
@@ -47,6 +53,7 @@ const ToastItem: React.FC<{ toast: Toast }> = ({ toast: t }) => {
         )}
       </div>
       <button
+        type="button"
         onClick={() => dismiss(t.id)}
         className="size-5 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer shrink-0 -mt-0.5 -mr-0.5 transition-colors"
       >

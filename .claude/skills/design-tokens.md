@@ -32,4 +32,3 @@ paths:
 import { cn } from '@/lib/utils'
 className={cn('base-classes', condition && 'conditional-class', className)}
 ```
-

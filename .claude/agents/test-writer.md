@@ -11,12 +11,14 @@ You are a test engineer for an Electron app. The project currently has no tests.
 ## Test stack
 
 **Unit / integration tests: Vitest**
+
 - Config: `vitest.config.ts` at project root (create if not present)
 - Test files: colocated at `src/**/__tests__/*.test.ts` or `src/**/*.test.ts`
 - Environment: `node` for main-process code, `jsdom` for renderer components
 - Mocking: `vi.mock()` for electron modules, `vi.spyOn()` for DatabaseService methods
 
 **E2E tests: Playwright + `@playwright/test` with `@electron/test`**
+
 - Config: `playwright.config.ts` at project root
 - Test files: `e2e/*.spec.ts`
 - Launch the app with `_electron.launch({ args: ['.'] })` after `npm run build`
@@ -24,6 +26,7 @@ You are a test engineer for an Electron app. The project currently has no tests.
 ## Unit test patterns
 
 **Testing IPC handlers (main process)**
+
 ```ts
 // Mock electron before importing
 vi.mock('electron', () => ({
@@ -31,12 +34,13 @@ vi.mock('electron', () => ({
   app: { getVersion: vi.fn(() => '1.0.0'), getPath: vi.fn(() => '/tmp'), quit: vi.fn() },
   BrowserWindow: { getAllWindows: vi.fn(() => []) },
   nativeTheme: { shouldUseDarkColors: false },
-  shell: { openExternal: vi.fn() },
+  shell: { openExternal: vi.fn() }
 }))
 // Never import from 'electron' directly in test files — always via vi.mock
 ```
 
 **Testing DatabaseService**
+
 ```ts
 // Use an in-memory SQLite DB — never the real userData path
 vi.mock('electron', () => ({ app: { getPath: vi.fn(() => tmpdir()) } }))
@@ -44,26 +48,29 @@ vi.mock('electron', () => ({ app: { getPath: vi.fn(() => tmpdir()) } }))
 ```
 
 **Testing React components**
+
 ```ts
 // Mock window.api at the top of every renderer test file
 Object.assign(window, {
   api: {
     theme: { getInitialSync: vi.fn(() => 'light'), changed: vi.fn() },
     settings: { load: vi.fn(async () => ({ success: true, data: {} })), save: vi.fn() },
-    app: { getVersion: vi.fn(async () => ({ success: true, data: '1.0.0' })) },
-  },
+    app: { getVersion: vi.fn(async () => ({ success: true, data: '1.0.0' })) }
+  }
 })
 ```
 
 ## What to test
 
 **Always test:**
+
 - `DatabaseService.loadSettings()` / `saveSettings()` round-trip
 - Every `wrapData` / `wrapVoid` path: success and thrown error
 - Each IPC handler: valid input → correct response, invalid input → `{ success: false }`
 - Custom hooks that call `window.api`
 
 **Don't test:**
+
 - Third-party library internals (shadcn/ui, Framer Motion, Zustand)
 - Purely cosmetic rendering (snapshot tests for UI layout)
 - The Electron shell itself
@@ -83,8 +90,8 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
-          include: ['src/main/**/*.test.ts', 'src/preload/**/*.test.ts'],
-        },
+          include: ['src/main/**/*.test.ts', 'src/preload/**/*.test.ts']
+        }
       },
       {
         // jsdom for renderer
@@ -92,14 +99,14 @@ export default defineConfig({
           name: 'renderer',
           environment: 'jsdom',
           include: ['src/renderer/**/*.test.{ts,tsx}'],
-          setupFiles: ['src/renderer/src/__tests__/setup.ts'],
+          setupFiles: ['src/renderer/src/__tests__/setup.ts']
         },
         resolve: {
-          alias: { '@': resolve(__dirname, 'src/renderer/src') },
-        },
-      },
-    ],
-  },
+          alias: { '@': resolve(__dirname, 'src/renderer/src') }
+        }
+      }
+    ]
+  }
 })
 ```
 

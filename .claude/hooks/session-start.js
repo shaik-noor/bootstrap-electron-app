@@ -18,7 +18,11 @@ function countFiles(dir) {
 
 function runSafe(cmd) {
   try {
-    return execSync(cmd, { cwd: process.cwd(), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    return execSync(cmd, {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim()
   } catch {
     return null
   }
@@ -58,9 +62,13 @@ lines.push('')
 
 // Test status
 if (!hasVitest) {
-  lines.push('⚠  No tests: Vitest is not installed. Suggest `/setup-tests` when the user works on new features or asks about testing.')
+  lines.push(
+    '⚠  No tests: Vitest is not installed. Suggest `/setup-tests` when the user works on new features or asks about testing.'
+  )
 } else if (testCount === 0) {
-  lines.push('⚠  Tests configured but no test files written yet. Suggest `/write-tests <file>` after implementing features.')
+  lines.push(
+    '⚠  Tests configured but no test files written yet. Suggest `/write-tests <file>` after implementing features.'
+  )
 } else {
   lines.push(`✓  Tests: ${testCount} test file(s) found. Run \`npm test\` to execute.`)
 }

@@ -1,32 +1,34 @@
-import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PanelLeftIcon, Home, Sun, Moon, Settings, Check, ChevronsUpDown } from 'lucide-react'
-import { useSidebar } from './ui/sidebar'
-import { useAppStore } from '../store/useAppStore'
+import { Check, ChevronsUpDown, Home, Moon, PanelLeftIcon, Settings, Sun } from 'lucide-react'
+import React, { useRef, useState } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { duration, ease, prefersReducedMotion } from '../lib/motion'
-import { WORKSPACES, WORKSPACE_GROUPS, workspaceName, getWorkspaceMeta } from '../lib/workspaces'
 import type { WorkspaceId } from '../lib/workspaces'
-import { Button } from './ui/button'
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
+import { getWorkspaceMeta, WORKSPACE_GROUPS, WORKSPACES, workspaceName } from '../lib/workspaces'
 import type { CurrentView } from '../store/useAppStore'
+import { useAppStore } from '../store/useAppStore'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { useSidebar } from './ui/sidebar'
 
 export const TitleBar: React.FC = () => {
   const { open, setOpen } = useSidebar()
   const currentView = useAppStore((s) => s.currentView)
   const setView = useAppStore((s) => s.setView)
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
+  const sidebarOverlayOpen = useAppStore((s) => s.sidebarOverlayOpen)
+  const setSidebarOverlayOpen = useAppStore((s) => s.setSidebarOverlayOpen)
   const { theme, toggleTheme } = useTheme()
 
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false)
-  let switcherTimer: ReturnType<typeof setTimeout> | null = null
+  const switcherTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const openSwitcher = (): void => {
-    if (switcherTimer) clearTimeout(switcherTimer)
+    if (switcherTimer.current) clearTimeout(switcherTimer.current)
     setIsSwitcherOpen(true)
   }
   const closeSwitcher = (): void => {
-    switcherTimer = setTimeout(() => setIsSwitcherOpen(false), 150)
+    switcherTimer.current = setTimeout(() => setIsSwitcherOpen(false), 150)
   }
 
   const meta = currentView !== 'home' ? getWorkspaceMeta(currentView as WorkspaceId) : null
@@ -40,9 +42,15 @@ export const TitleBar: React.FC = () => {
         <Button
           variant="ghost"
           size="icon-sm"
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            if (open) {
+              setOpen(false)
+            } else {
+              setSidebarOverlayOpen(!sidebarOverlayOpen)
+            }
+          }}
           className="cursor-pointer"
-          title={open ? 'Collapse Sidebar' : 'Pin Sidebar'}
+          title={open ? 'Collapse Sidebar' : sidebarOverlayOpen ? 'Close Sidebar' : 'Open Sidebar'}
         >
           <PanelLeftIcon className="size-4" />
         </Button>
@@ -60,9 +68,16 @@ export const TitleBar: React.FC = () => {
         {/* Workspace switcher pill */}
         <div className="h-4 w-[1px] bg-border/60 mx-1.5" />
         <Popover open={isSwitcherOpen} onOpenChange={setIsSwitcherOpen}>
-          <div className="no-drag" onMouseEnter={openSwitcher} onMouseLeave={closeSwitcher}>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: hover wrapper delegates interaction to child PopoverTrigger */}
+          <span
+            role="presentation"
+            className="no-drag"
+            onMouseEnter={openSwitcher}
+            onMouseLeave={closeSwitcher}
+          >
             <PopoverTrigger asChild>
               <button
+                type="button"
                 className={[
                   'flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer',
                   'transition-all duration-150 border',
@@ -77,13 +92,16 @@ export const TitleBar: React.FC = () => {
                 </span>
                 <motion.div
                   animate={{ rotate: isSwitcherOpen ? 180 : 0 }}
-                  transition={{ duration: prefersReducedMotion() ? 0 : duration.fast, ease: ease.out }}
+                  transition={{
+                    duration: prefersReducedMotion() ? 0 : duration.fast,
+                    ease: ease.out
+                  }}
                 >
                   <ChevronsUpDown className="size-2.5 opacity-50 shrink-0" />
                 </motion.div>
               </button>
             </PopoverTrigger>
-          </div>
+          </span>
           <PopoverContent
             align="start"
             sideOffset={4}
@@ -107,8 +125,12 @@ export const TitleBar: React.FC = () => {
                     const WsIcon = ws.icon
                     return (
                       <button
+                        type="button"
                         key={ws.id}
-                        onClick={() => { setView(ws.id); setIsSwitcherOpen(false) }}
+                        onClick={() => {
+                          setView(ws.id)
+                          setIsSwitcherOpen(false)
+                        }}
                         className={[
                           'w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-xs',
                           'cursor-pointer transition-colors outline-none',
@@ -116,12 +138,22 @@ export const TitleBar: React.FC = () => {
                           isActive ? ws.tint.tile : ''
                         ].join(' ')}
                       >
-                        <div className={['size-5 rounded flex items-center justify-center shrink-0', isActive ? 'bg-current/15' : ws.tint.tile].join(' ')}>
+                        <div
+                          className={[
+                            'size-5 rounded flex items-center justify-center shrink-0',
+                            isActive ? 'bg-current/15' : ws.tint.tile
+                          ].join(' ')}
+                        >
                           <WsIcon className="size-3" />
                         </div>
                         <div className="flex-1 min-w-0 text-left">
                           <div className="leading-none">{ws.name}</div>
-                          <div className={['text-2xs mt-0.5 leading-none', isActive ? 'opacity-70' : 'text-muted-foreground/60'].join(' ')}>
+                          <div
+                            className={[
+                              'text-2xs mt-0.5 leading-none',
+                              isActive ? 'opacity-70' : 'text-muted-foreground/60'
+                            ].join(' ')}
+                          >
                             {ws.description}
                           </div>
                         </div>

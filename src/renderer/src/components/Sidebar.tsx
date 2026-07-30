@@ -1,27 +1,28 @@
-import React from 'react'
-import { Home, Settings, Sun, Moon, LayoutDashboard, ChevronsUpDown, Check } from 'lucide-react'
+import { Check, ChevronsUpDown, Home, Moon, Settings, Sun } from 'lucide-react'
+import React, { useRef, useState } from 'react'
 import { useTheme } from '../context/ThemeContext'
+import type { WorkspaceId } from '../lib/workspaces'
+import { getWorkspaceMeta, WORKSPACE_GROUPS, WORKSPACES } from '../lib/workspaces'
+import { useAppStore } from '../store/useAppStore'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   useSidebar
 } from './ui/sidebar'
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
-import { useAppStore } from '../store/useAppStore'
-import { WORKSPACES, WORKSPACE_GROUPS, getWorkspaceMeta } from '../lib/workspaces'
-import type { WorkspaceId } from '../lib/workspaces'
-import { useState, useRef } from 'react'
 
-export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed: isCollapsedProp }) => {
+export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({
+  isCollapsed: isCollapsedProp
+}) => {
   const { state } = useSidebar()
   const isCollapsed = isCollapsedProp ?? state === 'collapsed'
   const { theme, toggleTheme } = useTheme()
@@ -68,13 +69,19 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
                             size="lg"
                             className="w-full text-left rounded-lg border border-sidebar-border transition-all duration-200 hover:shadow-xs relative group select-none cursor-pointer flex items-center gap-3 p-3 bg-transparent hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           >
-                            <div className={`flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg transition-colors ${ws.tint.tile} ${ws.tint.tileHover}`}>
+                            <div
+                              className={`flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg transition-colors ${ws.tint.tile} ${ws.tint.tileHover}`}
+                            >
                               <WsIcon className="size-4" />
                             </div>
                             {!isCollapsed && (
                               <div className="grid flex-1 text-left text-xs leading-tight min-w-0">
-                                <span className="font-semibold text-foreground truncate">{ws.name}</span>
-                                <span className="text-2xs text-muted-foreground truncate">{ws.description}</span>
+                                <span className="font-semibold text-foreground truncate">
+                                  {ws.name}
+                                </span>
+                                <span className="text-2xs text-muted-foreground truncate">
+                                  {ws.description}
+                                </span>
                               </div>
                             )}
                           </SidebarMenuButton>
@@ -90,22 +97,35 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
       )
     }
 
-    // ── Active workspace: renders its contextual content ────────────────────
-    // Add workspace-specific sidebar content here with a switch:
-    // switch (currentView) {
-    //   case 'dashboard': return <DashboardSidebarContent />
-    //   default: return null
-    // }
-    return (
-      <SidebarGroup className={`flex-1 min-h-0 flex flex-col ${isCollapsed ? 'p-1' : ''}`}>
-        <SidebarGroupLabel>{activeMeta?.name ?? 'Workspace'}</SidebarGroupLabel>
-        <SidebarGroupContent className="flex-1 min-h-0">
-          <div className="text-2xs text-muted-foreground px-3 py-2">
-            Add sidebar content for this workspace here.
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    )
+    // ── Active workspace: contextual sidebar nav ────────────────────────────
+    switch (currentView) {
+      case 'dashboard':
+        return (
+          <SidebarGroup className={`flex-1 min-h-0 flex flex-col ${isCollapsed ? 'p-1' : ''}`}>
+            {!isCollapsed && <SidebarGroupLabel>Dashboard</SidebarGroupLabel>}
+            <SidebarGroupContent className="flex-1 min-h-0">
+              <SidebarMenu className="flex flex-col gap-1">
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Overview" className="cursor-pointer" isActive>
+                    <Home className="size-4 shrink-0" />
+                    <span>Overview</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )
+      // Add more workspace cases here:
+      // case 'notes': return <NotesSidebarContent isCollapsed={isCollapsed} />
+      default:
+        return (
+          <SidebarGroup className={`flex-1 min-h-0 flex flex-col ${isCollapsed ? 'p-1' : ''}`}>
+            {!isCollapsed && (
+              <SidebarGroupLabel>{activeMeta?.name ?? 'Workspace'}</SidebarGroupLabel>
+            )}
+          </SidebarGroup>
+        )
+    }
   }
 
   return (
@@ -115,7 +135,10 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
         <SidebarMenu>
           <SidebarMenuItem>
             {currentView === 'home' ? (
-              <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default select-none">
+              <SidebarMenuButton
+                size="lg"
+                className="hover:bg-transparent cursor-default select-none"
+              >
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Home className="size-4" />
                 </div>
@@ -126,20 +149,30 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
               </SidebarMenuButton>
             ) : (
               <Popover open={isSwitcherOpen} onOpenChange={setIsSwitcherOpen}>
-                <div onMouseEnter={openSwitcher} onMouseLeave={closeSwitcher}>
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: hover wrapper delegates interaction to child PopoverTrigger */}
+                <span role="presentation" onMouseEnter={openSwitcher} onMouseLeave={closeSwitcher}>
                   <PopoverTrigger asChild>
-                    <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent cursor-pointer">
-                      <div className={`flex aspect-square size-8 items-center justify-center rounded-lg ${activeMeta?.tint.tile ?? ''}`}>
+                    <SidebarMenuButton
+                      size="lg"
+                      className="data-[state=open]:bg-sidebar-accent cursor-pointer"
+                    >
+                      <div
+                        className={`flex aspect-square size-8 items-center justify-center rounded-lg ${activeMeta?.tint.tile ?? ''}`}
+                      >
                         <ActiveIcon className="size-4" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold text-foreground">{activeMeta?.name ?? 'Workspace'}</span>
-                        <span className="truncate text-xs text-muted-foreground">{activeMeta?.description}</span>
+                        <span className="truncate font-semibold text-foreground">
+                          {activeMeta?.name ?? 'Workspace'}
+                        </span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {activeMeta?.description}
+                        </span>
                       </div>
                       <ChevronsUpDown className="ml-auto size-4" />
                     </SidebarMenuButton>
                   </PopoverTrigger>
-                </div>
+                </span>
                 <PopoverContent
                   className="w-[var(--radix-popover-trigger-width)] p-1 rounded-lg"
                   align="start"
@@ -152,7 +185,11 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
                   onInteractOutside={() => setIsSwitcherOpen(false)}
                 >
                   <button
-                    onClick={() => { setView('home'); setIsSwitcherOpen(false) }}
+                    type="button"
+                    onClick={() => {
+                      setView('home')
+                      setIsSwitcherOpen(false)
+                    }}
                     className="w-full flex items-center gap-2 p-2 cursor-pointer text-xs rounded-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground outline-none"
                   >
                     <div className="flex size-6 items-center justify-center rounded-sm border bg-primary/10 border-primary/20 text-primary shrink-0">
@@ -169,22 +206,32 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
                     return (
                       <React.Fragment key={group.id}>
                         <div className="-mx-1 my-1 h-px bg-border" />
-                        <div className="text-2xs uppercase tracking-widest text-muted-foreground/70 px-2 py-1">{group.label}</div>
+                        <div className="text-2xs uppercase tracking-widest text-muted-foreground/70 px-2 py-1">
+                          {group.label}
+                        </div>
                         {items.map((ws) => {
                           const WsIcon = ws.icon
                           const isCurrent = ws.id === currentView
                           return (
                             <button
+                              type="button"
                               key={ws.id}
-                              onClick={() => { setView(ws.id); setIsSwitcherOpen(false) }}
+                              onClick={() => {
+                                setView(ws.id)
+                                setIsSwitcherOpen(false)
+                              }}
                               className={`w-full flex items-center gap-2 p-2 cursor-pointer rounded-none transition-colors outline-none hover:bg-sidebar-accent ${isCurrent ? 'bg-sidebar-accent/50 font-semibold' : ''}`}
                             >
-                              <div className={`flex size-6 items-center justify-center rounded-sm border shrink-0 ${ws.tint.chip}`}>
+                              <div
+                                className={`flex size-6 items-center justify-center rounded-sm border shrink-0 ${ws.tint.chip}`}
+                              >
                                 <WsIcon className="size-3.5" />
                               </div>
                               <div className="flex flex-col text-left">
                                 <span className="text-xs">{ws.name}</span>
-                                <span className="text-2xs text-muted-foreground">{ws.description}</span>
+                                <span className="text-2xs text-muted-foreground">
+                                  {ws.description}
+                                </span>
                               </div>
                               {isCurrent && <Check className="ml-auto size-3.5 text-primary" />}
                             </button>
@@ -207,7 +254,11 @@ export const SidebarInner: React.FC<{ isCollapsed?: boolean }> = ({ isCollapsed:
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Settings" onClick={() => setSettingsOpen(true)} className="cursor-pointer">
+            <SidebarMenuButton
+              tooltip="Settings"
+              onClick={() => setSettingsOpen(true)}
+              className="cursor-pointer"
+            >
               <Settings className="size-4 shrink-0" />
               <span>Settings</span>
             </SidebarMenuButton>

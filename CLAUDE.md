@@ -86,41 +86,41 @@ This project ships purpose-built agents and workflows in `.claude/`. See [AGENTS
 
 ### Custom agents (`.claude/agents/`)
 
-| Invoke as | Purpose | Tools |
-|---|---|---|
-| `code-reviewer` | IPC contract, styling, Electron security conventions | read-only |
-| `ipc-builder` | Full IPC channel (main + preload + types) | read + edit |
-| `ui-component-builder` | Renderer components, Tailwind v4, shadcn | read + write |
-| `db-schema-builder` | Tables/columns in `DatabaseService` | read + edit |
-| `electron-packager` | Build, typecheck, native modules, installer | read + bash + edit |
-| `security-auditor` | Electron security audit — BrowserWindow, IPC, CSP, preload surface | read-only |
-| `test-writer` | Vitest unit tests and Playwright E2E tests | read + write + bash |
-| `a11y-reviewer` | Keyboard nav, ARIA, focus management, contrast | read-only |
-| `performance-reviewer` | Re-renders, Zustand selectors, bundle imports, Framer Motion | read-only |
+| Invoke as              | Purpose                                                            | Tools               |
+| ---------------------- | ------------------------------------------------------------------ | ------------------- |
+| `code-reviewer`        | IPC contract, styling, Electron security conventions               | read-only           |
+| `ipc-builder`          | Full IPC channel (main + preload + types)                          | read + edit         |
+| `ui-component-builder` | Renderer components, Tailwind v4, shadcn                           | read + write        |
+| `db-schema-builder`    | Tables/columns in `DatabaseService`                                | read + edit         |
+| `electron-packager`    | Build, typecheck, native modules, installer                        | read + bash + edit  |
+| `security-auditor`     | Electron security audit — BrowserWindow, IPC, CSP, preload surface | read-only           |
+| `test-writer`          | Vitest unit tests and Playwright E2E tests                         | read + write + bash |
+| `a11y-reviewer`        | Keyboard nav, ARIA, focus management, contrast                     | read-only           |
+| `performance-reviewer` | Re-renders, Zustand selectors, bundle imports, Framer Motion       | read-only           |
 
 ### Skills (`.claude/skills/`) — auto-loaded by file path
 
-| Skill | Triggers on | Injects |
-|---|---|---|
-| `ipc-status` | `src/main/index.ts`, `src/preload/**` | Live IPC channel inventory + rules |
-| `design-tokens` | `src/renderer/**/*.{tsx,css}` | Live token snapshot + Tailwind v4 rules |
-| `workspace-list` | `workspaces.ts`, `App.tsx`, `views/**` | Live workspace registry + routing map |
-| `security-context` | `src/main/index.ts`, `src/preload/**`, `index.html` | Live security config + invariants |
-| `test-conventions` | `**/*.test.*`, `**/*.spec.*`, `vitest.config.ts` | Mock patterns, what to test, test structure |
+| Skill              | Triggers on                                         | Injects                                     |
+| ------------------ | --------------------------------------------------- | ------------------------------------------- |
+| `ipc-status`       | `src/main/index.ts`, `src/preload/**`               | Live IPC channel inventory + rules          |
+| `design-tokens`    | `src/renderer/**/*.{tsx,css}`                       | Live token snapshot + Tailwind v4 rules     |
+| `workspace-list`   | `workspaces.ts`, `App.tsx`, `views/**`              | Live workspace registry + routing map       |
+| `security-context` | `src/main/index.ts`, `src/preload/**`, `index.html` | Live security config + invariants           |
+| `test-conventions` | `**/*.test.*`, `**/*.spec.*`, `vitest.config.ts`    | Mock patterns, what to test, test structure |
 
 ### Workflows (`.claude/workflows/`)
 
-| Command | What it does |
-|---|---|
-| `/code-review` | Parallel review of all changed files |
-| `/add-ipc-channel` | End-to-end IPC channel scaffolding with a spec as args |
-| `/build-and-check` | Run typecheck + build, then attempt parallel fixes |
-| `/add-workspace` | Create a new sidebar workspace (view + registry + router) |
-| `/security-audit` | 4-dimension parallel security audit with adversarial verification |
-| `/setup-tests` | Scaffold Vitest + Testing Library from scratch (run once) |
-| `/write-tests` | Write tests for a specific file or feature (pass path as args) |
-| `/full-review` | Pre-release gate: code + security + a11y + perf + test coverage in parallel |
-| `/sync-docs` | Sync CLAUDE.md, AGENTS.md, and all `.claude/` files to match current code |
+| Command            | What it does                                                                |
+| ------------------ | --------------------------------------------------------------------------- |
+| `/code-review`     | Parallel review of all changed files                                        |
+| `/add-ipc-channel` | End-to-end IPC channel scaffolding with a spec as args                      |
+| `/build-and-check` | Run typecheck + build, then attempt parallel fixes                          |
+| `/add-workspace`   | Create a new sidebar workspace (view + registry + router)                   |
+| `/security-audit`  | 4-dimension parallel security audit with adversarial verification           |
+| `/setup-tests`     | Scaffold Vitest + Testing Library from scratch (run once)                   |
+| `/write-tests`     | Write tests for a specific file or feature (pass path as args)              |
+| `/full-review`     | Pre-release gate: code + security + a11y + perf + test coverage in parallel |
+| `/sync-docs`       | Sync CLAUDE.md, AGENTS.md, and all `.claude/` files to match current code   |
 
 ### Hooks (`.claude/hooks/`)
 
@@ -128,6 +128,7 @@ Two hooks run automatically — no user action needed:
 
 **`SessionStart` → `session-start.js`**
 Fires when Claude Code opens this project. Injects into context:
+
 - Full command menu with one-line descriptions
 - Test infrastructure status (not installed / no tests / N test files)
 - CSP gap warning if `src/renderer/index.html` has no Content-Security-Policy
@@ -136,18 +137,18 @@ Fires when Claude Code opens this project. Injects into context:
 **`PostToolUse` on `Edit|Write` → `check-sync-needed.js`**
 Fires after every file edit. Maps the changed file to a targeted action:
 
-| File changed | Suggested action |
-|---|---|
-| `src/main/index.ts` | Update preload + types, `/write-tests`, `/sync-docs` |
-| `src/preload/index.ts` or `.d.ts` | Verify 3-file IPC contract, `/code-review` |
-| `databaseService.ts` | `/write-tests`, `/sync-docs` |
-| `src/shared/types.ts` | `/build-and-check` |
-| `workspaces.ts` or `App.tsx` | Check 3-file workspace consistency |
-| Any `views/` or `components/` file | `/write-tests`, `/code-review` |
-| `main.css` | `/build-and-check`, `/sync-docs` |
-| `package.json` | `/setup-tests` if test deps added, `/sync-docs` |
-| `.claude/**` files | `/sync-docs` |
-| `electron.vite.config.ts` or `electron-builder.yml` | `/build-and-check` |
+| File changed                                        | Suggested action                                     |
+| --------------------------------------------------- | ---------------------------------------------------- |
+| `src/main/index.ts`                                 | Update preload + types, `/write-tests`, `/sync-docs` |
+| `src/preload/index.ts` or `.d.ts`                   | Verify 3-file IPC contract, `/code-review`           |
+| `databaseService.ts`                                | `/write-tests`, `/sync-docs`                         |
+| `src/shared/types.ts`                               | `/build-and-check`                                   |
+| `workspaces.ts` or `App.tsx`                        | Check 3-file workspace consistency                   |
+| Any `views/` or `components/` file                  | `/write-tests`, `/code-review`                       |
+| `main.css`                                          | `/build-and-check`, `/sync-docs`                     |
+| `package.json`                                      | `/setup-tests` if test deps added, `/sync-docs`      |
+| `.claude/**` files                                  | `/sync-docs`                                         |
+| `electron.vite.config.ts` or `electron-builder.yml` | `/build-and-check`                                   |
 
 ## Known security gaps (current baseline)
 

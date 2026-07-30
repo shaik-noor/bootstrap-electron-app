@@ -1,5 +1,5 @@
-import React from 'react'
 import { motion } from 'framer-motion'
+import type React from 'react'
 import { duration, ease, prefersReducedMotion } from '../lib/motion'
 
 interface EmptyStateProps {
@@ -39,7 +39,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="flex flex-col gap-1">
         <p className={`font-medium text-foreground ${compact ? 'text-xs' : 'text-sm'}`}>{title}</p>
         {description && (
-          <p className={`mx-auto max-w-[220px] text-muted-foreground ${compact ? 'text-2xs leading-snug' : 'text-xs leading-relaxed'}`}>
+          <p
+            className={`mx-auto max-w-[220px] text-muted-foreground ${compact ? 'text-2xs leading-snug' : 'text-xs leading-relaxed'}`}
+          >
             {description}
           </p>
         )}

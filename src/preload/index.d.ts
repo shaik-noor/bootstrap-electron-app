@@ -1,7 +1,6 @@
 import type { ElectronAPI } from '@electron-toolkit/preload'
 import type { AppSettings } from '../shared/types'
 
-/** Generic IPC result envelope. */
 interface IpcResult<T = undefined> {
   success: boolean
   data?: T
@@ -22,9 +21,7 @@ declare global {
       }
       app: {
         getVersion(): Promise<IpcResult<string>>
-        // Add your own app methods here
       }
-      // Add your own namespaces here to match preload/index.ts
     }
   }
 }

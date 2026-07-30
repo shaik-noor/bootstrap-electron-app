@@ -1,38 +1,32 @@
-import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import { BootScreen } from './components/BootScreen'
+import { ConfirmDialogHost } from './components/ConfirmDialogHost'
+import { SettingsDialog } from './components/SettingsDialog'
 import { Sidebar, SidebarInner } from './components/Sidebar'
 import { TitleBar } from './components/TitleBar'
-import { SettingsDialog } from './components/SettingsDialog'
-import { BootScreen } from './components/BootScreen'
 import { Toaster } from './components/Toaster'
-import { ConfirmDialogHost } from './components/ConfirmDialogHost'
-import { HomeView } from './views/HomeView'
-import { DashboardView } from './views/DashboardView'
-import { SidebarProvider, SidebarInset, useSidebar } from './components/ui/sidebar'
+import { SidebarInset, SidebarProvider, useSidebar } from './components/ui/sidebar'
 import { TooltipProvider } from './components/ui/tooltip'
-import { useAppStore } from './store/useAppStore'
 import { duration, ease, prefersReducedMotion } from './lib/motion'
+import { useAppStore } from './store/useAppStore'
+import { DashboardView } from './views/DashboardView'
+import { HomeView } from './views/HomeView'
 
 // Add more view imports here:
 // import { NotesView } from './views/NotesView'
 
 function AppContent(): React.JSX.Element {
   const currentView = useAppStore((s) => s.currentView)
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+  const isOverlayOpen = useAppStore((s) => s.sidebarOverlayOpen)
+  const setSidebarOverlayOpen = useAppStore((s) => s.setSidebarOverlayOpen)
   const { open } = useSidebar()
 
-  // Close overlay when view or sidebar state changes
+  // Close overlay when sidebar is pinned open
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsOverlayOpen(false)
-  }, [currentView])
-
-  useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsOverlayOpen(false)
-    }
-  }, [open])
+    if (open) setSidebarOverlayOpen(false)
+  }, [open, setSidebarOverlayOpen])
 
   const renderContent = (): React.ReactNode => {
     switch (currentView) {
@@ -65,13 +59,16 @@ function AppContent(): React.JSX.Element {
                 exit={{ opacity: 0 }}
                 transition={{ duration: prefersReducedMotion() ? 0 : duration.fast }}
                 className="absolute inset-0 z-40 bg-black/10 backdrop-blur-xs"
-                onClick={() => setIsOverlayOpen(false)}
+                onClick={() => setSidebarOverlayOpen(false)}
               />
               <motion.div
                 initial={{ opacity: 0, x: prefersReducedMotion() ? 0 : -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: prefersReducedMotion() ? 0 : -16 }}
-                transition={{ duration: prefersReducedMotion() ? 0 : duration.base, ease: ease.out }}
+                transition={{
+                  duration: prefersReducedMotion() ? 0 : duration.base,
+                  ease: ease.out
+                }}
                 className="absolute top-1.5 left-3.5 z-50 w-64 h-[calc(100vh-60px)] bg-sidebar border border-border/60 shadow-2xl rounded-lg overflow-hidden flex flex-col"
               >
                 <SidebarInner isCollapsed={false} />
@@ -89,7 +86,10 @@ function AppContent(): React.JSX.Element {
                 initial={{ opacity: 0, y: prefersReducedMotion() ? 0 : 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: prefersReducedMotion() ? 0 : -6 }}
-                transition={{ duration: prefersReducedMotion() ? 0 : duration.base, ease: ease.out }}
+                transition={{
+                  duration: prefersReducedMotion() ? 0 : duration.base,
+                  ease: ease.out
+                }}
                 className="flex-1 min-h-0 overflow-hidden flex flex-col"
               >
                 {renderContent()}
@@ -117,7 +117,9 @@ function App(): React.JSX.Element {
       if (!cancelled) setBooting(false)
     })
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [loadAppVersion])
 
   return (

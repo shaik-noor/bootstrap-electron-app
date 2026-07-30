@@ -1,5 +1,5 @@
-import React from 'react'
 import { motion } from 'framer-motion'
+import type React from 'react'
 import { duration, ease, prefersReducedMotion } from '../lib/motion'
 
 export const BootScreen: React.FC = () => {
@@ -29,7 +29,9 @@ export const BootScreen: React.FC = () => {
         >
           <motion.div
             animate={reduced ? {} : { scale: [1, 1.04, 1], opacity: [0.9, 1, 0.9] }}
-            transition={reduced ? undefined : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+            transition={
+              reduced ? undefined : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
+            }
             className="flex size-20 items-center justify-center rounded-3xl bg-card shadow-lg ring-1 ring-border/60"
           >
             {/* Replace with your app icon: <img src={appIcon} className="size-14 rounded-2xl" /> */}
