@@ -12,12 +12,10 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { useSidebar } from './ui/sidebar'
 
 export const TitleBar: React.FC = () => {
-  const { open, setOpen } = useSidebar()
+  const { toggleSidebar } = useSidebar()
   const currentView = useAppStore((s) => s.currentView)
   const setView = useAppStore((s) => s.setView)
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
-  const sidebarOverlayOpen = useAppStore((s) => s.sidebarOverlayOpen)
-  const setSidebarOverlayOpen = useAppStore((s) => s.setSidebarOverlayOpen)
   const { theme, toggleTheme } = useTheme()
 
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false)
@@ -42,15 +40,9 @@ export const TitleBar: React.FC = () => {
         <Button
           variant="ghost"
           size="icon-sm"
-          onClick={() => {
-            if (open) {
-              setOpen(false)
-            } else {
-              setSidebarOverlayOpen(!sidebarOverlayOpen)
-            }
-          }}
-          className="cursor-pointer"
-          title={open ? 'Collapse Sidebar' : sidebarOverlayOpen ? 'Close Sidebar' : 'Open Sidebar'}
+          onClick={toggleSidebar}
+          className="cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          title="Toggle Sidebar"
         >
           <PanelLeftIcon className="size-4" />
         </Button>
@@ -59,7 +51,7 @@ export const TitleBar: React.FC = () => {
           variant="ghost"
           size="icon-sm"
           onClick={() => setView('home')}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           title="Home"
         >
           <Home className="size-4" />
@@ -177,7 +169,7 @@ export const TitleBar: React.FC = () => {
           variant="ghost"
           size="icon-sm"
           onClick={toggleTheme}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -201,7 +193,7 @@ export const TitleBar: React.FC = () => {
           variant="ghost"
           size="icon-sm"
           onClick={() => setSettingsOpen(true)}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           title="Settings"
         >
           <Settings className="size-4" />

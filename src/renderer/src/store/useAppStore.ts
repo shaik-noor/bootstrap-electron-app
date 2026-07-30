@@ -8,10 +8,6 @@ interface AppState {
   currentView: CurrentView
   setView: (view: CurrentView) => void
 
-  // ── Overlay sidebar (shown when sidebar is collapsed) ─────────────────────
-  sidebarOverlayOpen: boolean
-  setSidebarOverlayOpen: (open: boolean) => void
-
   // ── Settings dialog ───────────────────────────────────────────────────────
   settingsOpen: boolean
   setSettingsOpen: (open: boolean) => void
@@ -24,11 +20,7 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   // Navigation
   currentView: 'home',
-  setView: (view) => set({ currentView: view, sidebarOverlayOpen: false }),
-
-  // Overlay sidebar
-  sidebarOverlayOpen: false,
-  setSidebarOverlayOpen: (open) => set({ sidebarOverlayOpen: open }),
+  setView: (view) => set({ currentView: view }),
 
   // Settings
   settingsOpen: false,
